@@ -1,5 +1,12 @@
 # Monitor wydatków. Po prostu i bez reklam.
 
+Z jakiej aplikacji korzystasz?
+- [F-Droid](#instrukcja-instalacji-f-droid)
+- [Droid-ify](#instrukcja-instalacji-droid-ify)
+- [Nie korzystam ze sklepu firmy trzeciej](#instrukcja-instalacji-bez-sklepu)
+
+...lub skorzystaj z [aplikacji internetowej](https://monwyd.netlify.app) na dowolnej platformie.
+
 ## Instrukcja instalacji (F-Droid)
 ### 1. Zainstaluj F-Droid
 Pobierz i zainstaluj na swoim telefonie aplikację F-Droid z [oficjalnej strony](https://f-droid.org/pl/).
@@ -62,3 +69,6 @@ Na ekranie z informacjami o aplikacji naciśnij "Zainstaluj" i poczekaj na ukoń
 <img height="460" src="https://raw.githubusercontent.com/bartekmuzyk/monitor-wydatkow/master/screenshots/droidify5.png">
 <br/>
 Następnie postępuj z instrukcjami, które wyświetlają się na ekranie.
+
+## Instrukcja instalacji (bez sklepu)
+Możesz pobrać plik .apk bezpośrednio z GitHub [tutaj](https://github.com/bartekmuzyk/monitor-wydatkow/releases/tag/v1.0).
