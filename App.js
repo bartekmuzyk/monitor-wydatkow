@@ -28,31 +28,29 @@ function Main() {
 	const [data, setData] = useState(null);
 	const [tripModeData, setTripModeData] = useState(null);
 
-	async function saveData() {
-		await AsyncStorage.setItem("data", JSON.stringify(data));
+	async function saveData(content) {
+		await AsyncStorage.setItem("data", JSON.stringify(content));
 	}
 
-	async function saveTripModeData() {
-		await AsyncStorage.setItem("tripModeData", JSON.stringify(tripModeData));
+	async function saveTripModeData(content) {
+		await AsyncStorage.setItem("tripModeData", JSON.stringify(content));
 	}
 
 	async function loadData() {
-		const data = await AsyncStorage.getItem("data");
+		const fetchedData = await AsyncStorage.getItem("data");
 
-		if (data === String(null)) {
+		if (!fetchedData || fetchedData === "null") {
 			setData({});
-			await saveData();
 		} else {
-			setData(JSON.parse(data));
+			setData(JSON.parse(fetchedData));
 		}
 
-		const tripModeData = await AsyncStorage.getItem("tripModeData");
+		const fetchedTripModeData = await AsyncStorage.getItem("tripModeData");
 
-		if (tripModeData === String(null)) {
+		if (!fetchedTripModeData || fetchedTripModeData === "null") {
 			setTripModeData({active: false, people: []});
-			await saveTripModeData();
 		} else {
-			setTripModeData(JSON.parse(tripModeData));
+			setTripModeData(JSON.parse(fetchedTripModeData));
 		}
 	}
 
@@ -70,8 +68,12 @@ function Main() {
 		loadData();
 	}, []);
 
-	useEffect(() => void saveData(), [data]);
-	useEffect(() => void saveTripModeData(), [tripModeData]);
+	useEffect(() => {
+		if (data !== null) saveData(data);
+	}, [data]);
+	useEffect(() => {
+		if (tripModeData !== null) saveTripModeData(tripModeData);
+	}, [tripModeData]);
 
 	const bottomNavSceneMap = BottomNavigation.SceneMap({
 		"wydatki": () => <Wydatki data={data} updateData={setData} tripModeData={tripModeData} />,
