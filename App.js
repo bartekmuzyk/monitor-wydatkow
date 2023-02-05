@@ -3,14 +3,14 @@ import {
 	MD3DarkTheme as DefaultTheme,
 	Provider as PaperProvider,
 	Appbar,
-	BottomNavigation
+	BottomNavigation, Text
 } from 'react-native-paper';
 import {useEffect, useState} from "react";
 import Wydatki from "./pages/wydatki";
 import Dlugi from "./pages/dlugi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TrybWycieczki from "./pages/trybwycieczki";
-import {Platform} from "react-native";
+import {Platform, ScrollView, StyleSheet, View} from "react-native";
 
 /**
  * @typedef {Object<string, {title: string, cost: string, owers: {name: string, alreadyPaid: string}[]}>} Data
@@ -27,6 +27,21 @@ function Main() {
 
 	const [data, setData] = useState(null);
 	const [tripModeData, setTripModeData] = useState(null);
+	const [logLines, setLogLines] = useState([]);
+	const [logsOpened, setLogsOpened] = useState(false);
+
+	function log(message) {
+		if (Platform.OS === "web") {
+			console.log(message);
+			return;
+		}
+
+		if (typeof message === "object") {
+			message = JSON.stringify(message, undefined, 4);
+		}
+
+		setLogLines(prevState => [...prevState, message]);
+	}
 
 	async function saveData(content) {
 		await AsyncStorage.setItem("data", JSON.stringify(content));
@@ -39,18 +54,32 @@ function Main() {
 	async function loadData() {
 		const fetchedData = await AsyncStorage.getItem("data");
 
+		log("[loadData] fetched data:");
+		log(fetchedData);
+
 		if (!fetchedData || fetchedData === "null") {
+			log("[loadData] data empty, setting default");
 			setData({});
 		} else {
-			setData(JSON.parse(fetchedData));
+			const parsed = JSON.parse(fetchedData);
+			log("[loadData] parsed data:");
+			log(parsed);
+			setData(parsed);
 		}
 
 		const fetchedTripModeData = await AsyncStorage.getItem("tripModeData");
 
+		log("[loadData] fetched tripModeData:");
+		log(fetchedTripModeData);
+
 		if (!fetchedTripModeData || fetchedTripModeData === "null") {
+			log("[loadData] tripModeData empty, setting default");
 			setTripModeData({active: false, people: []});
 		} else {
-			setTripModeData(JSON.parse(fetchedTripModeData));
+			const parsed = JSON.parse(fetchedTripModeData);
+			log("[loadData] parsed tripModeData:");
+			log(parsed);
+			setTripModeData(parsed);
 		}
 	}
 
@@ -65,14 +94,33 @@ function Main() {
 			document.body.appendChild(bottomBar);
 		}
 
-		loadData();
+		log("========= START =========")
+
+		loadData()
+			.then(() => {
+				log("data loaded");
+			})
 	}, []);
 
 	useEffect(() => {
-		if (data !== null) saveData(data);
+		log("[effect] data modification detected, saving.");
+
+		if (data !== null) {
+			log("[effect] saved data:");
+			log(data);
+			saveData(data);
+		}
+		else log("[effect] data was null, saving cancelled");
 	}, [data]);
 	useEffect(() => {
-		if (tripModeData !== null) saveTripModeData(tripModeData);
+		log("[effect] tripModeData modification detected, saving.");
+
+		if (tripModeData !== null) {
+			log("[effect] saved tripModeData:");
+			log(tripModeData);
+			saveTripModeData(tripModeData);
+		}
+		else log("[effect] tripModeData was null, saving cancelled");
 	}, [tripModeData]);
 
 	const bottomNavSceneMap = BottomNavigation.SceneMap({
@@ -89,8 +137,25 @@ function Main() {
 		<StatusBar style="light" />
 		<Appbar.Header>
 			<Appbar.Content title={bottomNavButtons.filter(r => r.key === tabNames[currentTabIndex])[0].title} />
+			<Appbar.Action icon="script-text-outline" onPress={() => setLogsOpened(prevState => !prevState)} />
 		</Appbar.Header>
-		<BottomNavigation navigationState={{index: currentTabIndex, routes: bottomNavButtons}} onIndexChange={setCurrentTabIndex} renderScene={bottomNavSceneMap} />
+		{
+			logsOpened ?
+				<ScrollView style={{backgroundColor: "black"}}>
+					<>
+					{
+						logLines.map((line, index) =>
+							<>
+								<Text key={`text${index}`} variant="bodyMedium" style={{fontFamily: "monospace"}}>{line}</Text>
+								<View key={`hr${index}`} style={{borderBottomColor: "gray", borderBottomWidth: StyleSheet.hairlineWidth}}/>
+							</>
+						)
+					}
+					</>
+				</ScrollView>
+				:
+				<BottomNavigation navigationState={{index: currentTabIndex, routes: bottomNavButtons}} onIndexChange={setCurrentTabIndex} renderScene={bottomNavSceneMap} />
+		}
 	</>;
 }
 
